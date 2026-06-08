@@ -50,4 +50,40 @@ def tcp_client(server_ip, server_port, duration, interval):
 
 
 
-    
+ def tcp_server(port) : 
+     
+     #This listen for incoming TCP client connections on the given port. Multiple clients are handled simulaneously (obvious for this process)
+     #using the select.select() multiplexing. Whenever there is EMPTY data that is received: the connection is THEN closed
+
+     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+     server_socket.bind(("0.0.0.0", port))
+     server_socket.listen()
+
+     readList = [server_socket]
+     print(f"Server is listening on Port" {port}")
+
+  
+
+    while True:
+
+        rlist, _, _ = select.select(readList, [], [])
+
+        if server_socket in rlist: #returns a list of sockets that are READY: to connect to server
+            client_socket, client_address = server_socket.accept() #two things returned: the actual PIPE to specific client and the ADDRESS of the client
+            readList.append(client_socket) #Once a client has connected : the specific socket belonging TO them is added to the Watch List: to be WATCHED
+            rlist.remove(server_socket)
+
+        for client_socket in rlist:
+            if client_socket is server_socket:
+                continue
+
+            data = client_socket.recv(1024)
+
+            if len(data) == 0:
+            printf(f"Client has disconnected")
+                client_socket.close()
+                readList.remove(client_socket)
+                continue
+ }
