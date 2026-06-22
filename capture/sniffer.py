@@ -21,6 +21,7 @@ def processPacket(packet):
             "size": size
         }
         packetLog.append(entry)  #the packets passed through we captured will be added into the entry
+        logConnection(sourceIP)
         print(f"[{timestamp}] {protocol} {sourceIP} → {destIP} ({size} bytes)")
 
 def startSniffing(interface="lo", duration=30):
