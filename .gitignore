@@ -1,0 +1,8 @@
+*.swp
+*.pyc
+*.save
+__pycache__/
+*.db
+.env
+
+

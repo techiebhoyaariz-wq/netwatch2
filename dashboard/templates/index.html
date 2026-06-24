@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NetWatch Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* dark theme - standard for security tools */
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: monospace;
+            padding: 20px;
+        }
+        h1 { color: #58a6ff; }
+        h2 { color: #8b949e; font-size: 14px; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .alert-item {
+            padding: 8px;
+            margin: 4px 0;
+            border-left: 3px solid #f85149;
+            background-color: #1f1f1f;
+            font-size: 12px;
+        }
+        .stat {
+            font-size: 32px;
+            color: #f85149;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ NetWatch — Network Security Monitor</h1>
+    <p>Real-time packet capture and anomaly detection | Built on SCC231 coursework</p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>PROTOCOL BREAKDOWN</h2>
+            <canvas id="protocolChart"></canvas>
+        </div>
+        <div class="card">
+            <h2>TOTAL ALERTS</h2>
+            <p class="stat" id="alertCount">—</p>
+            <p>alerts detected this session</p>
+        </div>
+        <div class="card" style="grid-column: span 2;">
+            <h2>RECENT ALERTS</h2>
+            <div id="alertFeed">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        // initialise the protocol pie chart
+        const ctx = document.getElementById('protocolChart').getContext('2d');
+        const protocolChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: ['#58a6ff', '#3fb950', '#f85149']
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { labels: { color: '#c9d1d9' } }
+                }
+            }
+        });
+
+        // fetch stats and update chart every 3 seconds
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // update protocol chart
+                    protocolChart.data.labels = Object.keys(data.protocols);
+                    protocolChart.data.datasets[0].data = Object.values(data.protocols);
+                    protocolChart.update();
+                    // update alert count
+                    document.getElementById('alertCount').textContent = data.total_alerts;
+                });
+        }
+
+        // fetch recent alerts and display them
+        function updateAlerts() {
+            fetch('/api/alerts')
+                .then(response => response.json())
+                .then(alerts => {
+                    const feed = document.getElementById('alertFeed');
+                    if (alerts.length === 0) {
+                        feed.innerHTML = '<p>No alerts detected</p>';
+                        return;
+                    }
+                    feed.innerHTML = alerts.map(alert =>
+                        `<div class="alert-item">
+                            [${alert.timestamp}] ${alert.alert_type.toUpperCase()} 
+                            from ${alert.source_ip} — ${alert.details}
+                        </div>`
+                    ).join('');
+                });
+        }
+
+        // run immediately then every 3 seconds
+        updateStats();
+        updateAlerts();
+        setInterval(updateStats, 3000);
+        setInterval(updateAlerts, 3000);
+    </script>
+</body>
+</html>

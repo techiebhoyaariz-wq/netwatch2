@@ -1,5 +1,9 @@
 from scapy.all import sniff, IP, TCP, UDP
 import time
+from database.db import insertPacket, insertAlert
+from capture.anomaly import logConnection
+
+# we added this line after creating dashboard this is because right now the sniffer just stores inside list packetLog, which will be lost due to limited memory so we import database so database functions can save data permanentely
 
 # tracks packets captured per source IP; essentially what we do it maintain a list of ALL packets we captured
 packetLog = []
@@ -21,7 +25,14 @@ def processPacket(packet):
             "size": size
         }
         packetLog.append(entry)  #the packets passed through we captured will be added into the entry
-        logConnection(sourceIP)
+
+        insertPacket(timestamp, sourceIP, destIP, protocol, size)
+        #added this so that every packet that passes through the processPacket will get saves instantly to database, 
+        #and THIS, when saved to database will show the breakdown of the protocol dashboard with real data
+
+        
+        if logConnection(sourceIP):
+            insertAlert(sourceIP, 'brute_force', 'Exceeded connection threshold')
         print(f"[{timestamp}] {protocol} {sourceIP} → {destIP} ({size} bytes)")
 
 def startSniffing(interface="lo", duration=30):
