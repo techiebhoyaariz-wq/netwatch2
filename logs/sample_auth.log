@@ -1,0 +1,5 @@
+Jun 22 14:23:01 server sshd[1234]: Failed password for root from 192.168.1.100 port 4521 ssh2
+Jun 22 14:23:05 server sshd[1234]: Failed password for admin from 192.168.1.100 port 4522 ssh2
+Jun 22 14:23:09 server sshd[1234]: Failed password for user1 from 10.0.0.5 port 4523 ssh2
+Jun 22 14:23:15 server sshd[1234]: Accepted password for john from 192.168.1.200 port 4524 ssh2
+Jun 22 14:23:20 server sshd[1234]: Failed password for root from 192.168.1.100 port 4525 ssh2

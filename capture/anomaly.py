@@ -2,6 +2,7 @@ import time
 
 
 
+
 # stores connection attempts per IP address
 connectionLog = {}
 
@@ -67,6 +68,7 @@ def detectPortScan(sourceIP, destPort):
 
 
     
+
 
 
 
