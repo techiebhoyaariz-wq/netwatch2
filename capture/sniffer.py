@@ -1,6 +1,6 @@
 from scapy.all import sniff, IP, TCP, UDP
 import time
-
+from soc.ioc_tracker import checkIOC
 from capture.anomaly import logConnection, detectPortScan
 from database.db import insertPacket, insertAlert
 
@@ -35,6 +35,9 @@ def processPacket(packet):
     if logConnection(sourceIP):  #Why do we use this IP only?
        insertAlert(sourceIP, 'Potential Brute Force is being Detected',  'threshold details here')
        #Remember the parameters like details and type like declared in other file are like parameters replaced they we place depending on context of the file
+
+       if checkIOC(sourceIP):
+          insertAlert(sourceIP, 'ioc_match', f'Known malicious IP detected in live traffic — {sourceIP}')
 
         
     if TCP in packet:  #checks if packet uses TCP protocol
