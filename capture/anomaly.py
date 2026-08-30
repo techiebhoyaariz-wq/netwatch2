@@ -1,6 +1,9 @@
 import time
 
+#note, so that we can send the details OF the alerts over to the provider, we needed to import the function sendDiscortAlert
+#That is over at the bottom
 
+from alerts.notifier import sendDiscordAlert
 
 
 # stores connection attempts per IP address
@@ -38,6 +41,7 @@ def logConnection(sourceIP):
 
     if attemptCount >= MAX_CONNECTIONS:
         print(f"[ALERT] Possible brute force from {sourceIP} — {attemptCount} connections in {TIME_WINDOW}s")
+        sendDiscordAlert(sourceIP, 'brute force attack', f'{attemptCount} connections in {TIME_WINDOW}s')#this sends the information over to be displayed at discord!
         return True
 
     return False

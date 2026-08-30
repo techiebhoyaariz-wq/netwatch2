@@ -38,7 +38,8 @@ def processPacket(packet):
 
        if checkIOC(sourceIP):
           insertAlert(sourceIP, 'ioc_match', f'Known malicious IP detected in live traffic — {sourceIP}')
-
+     #added this function here cause checkIOC exists but nothing ever calls it during live traffic
+     #so every time packet flows/captured we check against watchlist to see if malicioius or not
         
     if TCP in packet:  #checks if packet uses TCP protocol
       destPort = packet[TCP].dport #destination port being probed on our server
