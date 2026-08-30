@@ -16,8 +16,7 @@ def processPacket(packet):
         size = len(packet)
         timestamp = time.strftime('%H:%M:%S')
 
-
-      #Note we moved both if statements up here because this is all in line related to the types of protocol detected obviously. Logically should have realised this but why didnt I
+        #Note we moved both if statements up here because this is all in line related to the types of protocol detected obviously. Logically should have realised this but why didnt I
         
         entry = {  #here we create an entry based on the data packets that we have captured passing though, before appending it to a "list" of captured packets
             "time": timestamp,
@@ -28,37 +27,30 @@ def processPacket(packet):
         }
         packetLog.append(entry)  #the packets passed through we captured will be added into the entry
 
-    insertPacket(timestamp, sourceIP, destIP, protocol, size) #REMEMBER the parameters need right order in way declared
-    #Note when importing and reusing diferent functions in code and adding parameters, they need to be in same order they been declard before!
+        insertPacket(timestamp, sourceIP, destIP, protocol, size) #REMEMBER the parameters need right order in way declared
+        #Note when importing and reusing diferent functions in code and adding parameters, they need to be in same order they been declard before!
 
+        if logConnection(sourceIP):  #Why do we use this IP only?
+            insertAlert(sourceIP, 'Potential Brute Force is being Detected', 'threshold details here', 'HIGH')
+            #Remember the parameters like details and type like declared in other file are like parameters replaced they we place depending on context of the file
 
-    if logConnection(sourceIP):  #Why do we use this IP only?
-       insertAlert(sourceIP, 'Potential Brute Force is being Detected',  'threshold details here')
-       #Remember the parameters like details and type like declared in other file are like parameters replaced they we place depending on context of the file
+        #added this function here cause checkIOC exists but nothing ever calls it during live traffic
+        #so every time packet flows/captured we check against watchlist to see if malicioius or not
 
-       if checkIOC(sourceIP):
-          insertAlert(sourceIP, 'ioc_match', f'Known malicious IP detected in live traffic — {sourceIP}')
-     #added this function here cause checkIOC exists but nothing ever calls it during live traffic
-     #so every time packet flows/captured we check against watchlist to see if malicioius or not
-        
-    if TCP in packet:  #checks if packet uses TCP protocol
-      destPort = packet[TCP].dport #destination port being probed on our server
-      if detectPortScan(sourceIP, destPort): #check if this IP is scanning multiple ports
-         insertAlert(sourceIP, 'port_scan', f'TCP scan — contacted port {destPort}')
+        if checkIOC(sourceIP):
+            insertAlert(sourceIP, 'ioc_match', f'Known malicious IP detected in live traffic — {sourceIP}', 'CRITICAL')
 
-    if UDP in packet:  #UDP scans are less common but still worth detecting
-      destPort = packet[UDP].dport
-      if detectPortScan(sourceIP, destPort):
-        insertAlert(sourceIP, 'port_scan', f'TCP scan — contacted port {destPort}')
+        if TCP in packet:
+            destPort = packet[TCP].dport
+            if detectPortScan(sourceIP, destPort):
+                insertAlert(sourceIP, 'port_scan', f'TCP scan — contacted port {destPort}', 'MEDIUM')
 
-      insertPacket(timestamp, sourceIP, destIP, destPort, size, protocol)
-    #Note when importing and reusing diferent functions in code and adding parameters, they need to be in same order they been declard before!
+        if UDP in packet:
+            destPort = packet[UDP].dport
+            if detectPortScan(sourceIP, destPort):
+                insertAlert(sourceIP, 'port_scan', f'UDP scan — contacted port {destPort}', 'MEDIUM')
 
-      
-      #Note we need to after detecting the types of protocol or all other packet info to save it to the Dataabse
-      #This is because 
-
-    print(f"[{timestamp}] {protocol} {sourceIP} → {destIP} ({size} bytes)")
+        print(f"[{timestamp}] {protocol} {sourceIP} → {destIP} ({size} bytes)")
 
 def startSniffing(interface="lo", duration=30):
     """
@@ -69,4 +61,3 @@ def startSniffing(interface="lo", duration=30):
     sniff(iface=interface, prn=processPacket, timeout=duration, store=False)
     print(f"Capture complete. {len(packetLog)} packets logged.")
     return packetLog
-
