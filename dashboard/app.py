@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template
-from database.db import getRecentAlerts, initDB
+from database.db import getRecentAlerts, initDB, getAlertStats, getTOPIPs
 import threading
 import sys
 import os
@@ -25,9 +25,24 @@ def apiAlerts():
             "timestamp": row[0],
             "source_ip": row[1],
             "alert_type": row[2],
-            "details": row[3]
+            "details": row[3],
+            "severity": row[4] #rememebr this is because we wanted to basically ADD the extra severity!
         })
     return jsonify(alertList)
+
+@app.route('/api/topips')
+def apiTopIPs():
+    """Returns top 5 source IPs by alert count"""
+    Ips = getTOPIPs()
+
+    IPlist = []
+    for row in Ips:
+        IPlist.append({
+            "source_ip": row[0],
+             "total": row[1],
+})
+    return jsonify(IPlist)
+
 
 @app.route('/api/stats')
 def apiStats():
@@ -44,17 +59,34 @@ def apiStats():
     # total alerts count
     cursor.execute("SELECT COUNT(*) FROM alerts")
     totalAlerts = cursor.fetchone()[0]
+  
     
     conn.close()
     
     protocols = {}
     for row in protocolRows:
         protocols[row[0]] = row[1]
+
+
+    # convert severity tuples to dictionary
+    severityRows = getAlertStats()
+    severity = {}
+    for row in severityRows:
+        severity[row[0]] = row[1]
+        
+
     
     return jsonify({
         "protocols": protocols,
-        "total_alerts": totalAlerts
+        "total_alerts": totalAlerts,
+        "severity": severity
     })
+
+
+
+
+
+
 
 if __name__ == '__main__':
     initDB()

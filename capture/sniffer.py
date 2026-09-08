@@ -31,7 +31,7 @@ def processPacket(packet):
         #Note when importing and reusing diferent functions in code and adding parameters, they need to be in same order they been declard before!
 
         if logConnection(sourceIP):  #Why do we use this IP only?
-            insertAlert(sourceIP, 'Potential Brute Force is being Detected', 'threshold details here', 'HIGH')
+            insertAlert(sourceIP, 'brute_force', f'Brute force detected — {sourceIP} exceeded connection threshold', 'HIGH')
             #Remember the parameters like details and type like declared in other file are like parameters replaced they we place depending on context of the file
 
         #added this function here cause checkIOC exists but nothing ever calls it during live traffic

@@ -10,7 +10,7 @@ from alerts.notifier import sendDiscordAlert
 connectionLog = {}
 
 # detection thresholds
-MAX_CONNECTIONS = 10   # max allowed connections from one IP
+MAX_CONNECTIONS = 50   # max allowed connections from one IP
 TIME_WINDOW = 10       # within this many seconds
 
 def logConnection(sourceIP):
