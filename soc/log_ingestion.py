@@ -23,7 +23,7 @@ def parseAuthLog(filepath):
                 if username:
                     username = username.group(1)
 
-                insertAlert(sourceIP, 'failed_login', f'Failed password attempt for {username}')
+                insertAlert(sourceIP, 'failed_login', f'Failed password attempt for {username}', 'MEDIUM')
                 print(f"[ALERT] Failed login — IP: {sourceIP} | User: {username}")
 
 

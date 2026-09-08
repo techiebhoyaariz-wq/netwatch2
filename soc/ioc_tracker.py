@@ -7,7 +7,7 @@ def checkIOC(sourceIP):
 
     if sourceIP in maliciousIP:
         insertAlert(sourceIP, 'ioc match found', f'Known malicious IP detected, {sourceIP} is on IOC WatchList')
-        print(f"[CRITICAL] IOC match — {sourceIP} is a known malicious IP")
+        print(f"[CRITICAL] IOC match — {sourceIP} is a known malicious IP", 'CRITICAL')
         return True
     else:
         return False
